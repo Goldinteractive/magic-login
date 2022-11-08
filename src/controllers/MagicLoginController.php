@@ -78,7 +78,7 @@ class MagicLoginController extends Controller
      *
      * @return string
      */
-    public function actionLogin()
+    public function actionLogin(?string $from = null)
     {
         $this->requirePostRequest();
 
@@ -100,6 +100,17 @@ class MagicLoginController extends Controller
             // TODO: Maybe set this to be configurable in future.
             $this->setFailFlash(\Craft::t('magic-login', 'Please enter a valid email address.'));
             return;
+        }
+
+        $user = Craft::$app->users->getUserByUsernameOrEmail($email);
+
+        if (!$user &&
+            // for preventing an endless loop if save-user fails somehow
+            $from !== 'magicLinkRegister' &&
+            MagicLogin::getInstance()->getSettings()->autoRegisterOnLogin &&
+            MagicLogin::getInstance()->policy->isAllowedToRegister($email)
+        ) {
+            Craft::$app->runAction('magic-login/magic-login/register');
         }
 
         $link = MagicLogin::$plugin
@@ -200,7 +211,9 @@ class MagicLoginController extends Controller
         // Lookup email address - do we have a user?
         $user = User::findOne(['email' => $email]);
         if ($user) {
-            return Craft::$app->runAction('magic-login/magic-login/login');
+            return Craft::$app->runAction('magic-login/magic-login/login', [
+                'from' => 'magicLinkRegister'
+            ]);
         }
 
         if (!MagicLogin::getInstance()->policy->isAllowedToRegister($email)) {
@@ -212,7 +225,9 @@ class MagicLoginController extends Controller
         Craft::$app->runAction('users/save-user');
 
         // Send the new user a magic login link email.
-        Craft::$app->runAction('magic-login/magic-login/login');
+        Craft::$app->runAction('magic-login/magic-login/login', [
+            'from' => 'magicLinkRegister'
+        ]);
 
         // Render the login_link_sent template.
         return $this->redirectToPostedUrl(null, 'magic-login/login-link-sent');

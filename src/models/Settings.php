@@ -59,6 +59,14 @@ class Settings extends Model
      */
     public $allowedEmailPatternForRegistration = '.*';
 
+    /**
+     * If a user without an account tries to login, automatically register him
+     * ($allowedEmailPatternForRegistration must match)
+     *
+     * @var bool
+     */
+    public $autoRegisterOnLogin = false;
+
 	// TODO: Add a setting to say if magic login click should also verify a user.
 	// Grey out the option if verification is disabled on the website.
 
