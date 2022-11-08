@@ -203,6 +203,11 @@ class MagicLoginController extends Controller
             return Craft::$app->runAction('magic-login/magic-login/login');
         }
 
+        if (!MagicLogin::getInstance()->policy->isAllowedToRegister($email)) {
+            $this->setFailFlash(\Craft::t('magic-login', 'You are not allowed to register with this email address.'));
+            return;
+        }
+
         // Save the user
         Craft::$app->runAction('users/save-user');
 

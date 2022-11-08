@@ -52,6 +52,13 @@ class Settings extends Model
 	 */
 	public $authenticationEmailSubject = 'Magic Login Link';
 
+    /**
+     * Regex pattern of email addresses which are able to register
+     *
+     * @var string
+     */
+    public $allowedEmailPatternForRegistration = '.*';
+
 	// TODO: Add a setting to say if magic login click should also verify a user.
 	// Grey out the option if verification is disabled on the website.
 
@@ -72,7 +79,8 @@ class Settings extends Model
 	{
 		return [
 			[['linkExpiry', 'passwordLength'], 'number'],
-			[['authenticationEmailSubject'], 'string'],
+            [['autoRegisterOnLogin'], 'boolean'],
+			[['authenticationEmailSubject', 'allowedEmailPatternForRegistration'], 'string'],
 		];
 	}
 }

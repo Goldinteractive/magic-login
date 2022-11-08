@@ -13,6 +13,7 @@ namespace creode\magiclogin;
 use Craft;
 use craft\web\View;
 
+use creode\magiclogin\services\PolicyService;
 use yii\base\Event;
 use craft\base\Plugin;
 use craft\mail\Mailer;
@@ -48,6 +49,7 @@ use creode\magiclogin\services\MagicLoginRandomGeneratorService;
  *
  * @property MagicLoginAuthService $magicLoginAuthService
  * @property MagicLoginRandomGeneratorService $magicLoginRandomGeneratorService
+ * @property PolicyService $policy
  * @property Settings $settings
  * @method   Settings getSettings()
  */
@@ -87,7 +89,7 @@ class MagicLogin extends Plugin
      * @var bool
      */
 //    public bool $hasCpSection = false;
-    
+
     public const MAGIC_LOGIN_USER_GROUP_HANDLE = 'magicLogin';
 
     // Public Methods
@@ -123,6 +125,19 @@ class MagicLogin extends Plugin
             UsersController::class,
             UsersController::EVENT_BEFORE_ACTION,
             function (ActionEvent $event) {
+                $userSession = Craft::$app->getUser();
+                $currentUser = $userSession->getIdentity();
+                $newEmail = trim($this->request->getBodyParam('email') ?? '') ?: null;
+
+                // cancel any unallowed registration attempts over the craft endpoint
+                if ($event->sender->action->actionMethod === 'actionSaveUser' &&
+                    !$currentUser &&
+                    !MagicLogin::getInstance()->policy->isAllowedToRegister($newEmail)) {
+                    $event->isValid = false;
+
+                    return false;
+                }
+
                 if (! $this->request->getBodyParam('magicLoginRegistration')) {
                     return false;
                 }
@@ -245,7 +260,7 @@ class MagicLogin extends Plugin
     public function handleMagicLoginAfterUserSave(ActionEvent $event)
     {
         $event->sender->requirePostRequest();
-        
+
         // If we are updating an existing user then skip this.
         $userId = $this->request->getBodyParam('userId');
         if ($userId) {
@@ -261,7 +276,7 @@ class MagicLogin extends Plugin
         if ($currentUser && $currentUser->email !== $email) {
             return;
         }
-        
+
         $user = User::find()
             ->anyStatus()
             ->email($email)
@@ -482,6 +497,7 @@ class MagicLogin extends Plugin
             [
                 'magicLoginRandomGeneratorService' => MagicLoginRandomGeneratorService::class,
                 'magicLoginAuthService' => MagicLoginAuthService::class,
+                'policy' => PolicyService::class,
             ]
         );
     }
