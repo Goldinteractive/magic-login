@@ -23,8 +23,9 @@
  */
 
 return [
-
-	// This controls blah blah blah
-	"someAttribute" => true,
-
+    'linkExpiry'                         => 15,
+    'passwordLength'                     => 16,
+    'authenticationEmailSubject'         => 'Magic Login Link',
+    'autoRegisterOnLogin'                => false,
+    'allowedEmailPatternForRegistration' => '.*',
 ];
