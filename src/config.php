@@ -25,6 +25,7 @@
 return [
     'linkExpiry'                         => 15,
     'passwordLength'                     => 16,
+    'loginDuration'                      => 0, // in seconds, 0 = session
     'authenticationEmailSubject'         => 'Magic Login Link',
     'autoRegisterOnLogin'                => false,
     'allowedEmailPatternForRegistration' => '.*',

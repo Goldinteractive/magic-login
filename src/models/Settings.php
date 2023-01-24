@@ -67,6 +67,14 @@ class Settings extends Model
      */
     public $autoRegisterOnLogin = false;
 
+    /**
+     * The number of seconds that the user can remain in logged-in status.
+     * 0 = session
+     *
+     * @var integer
+     */
+    public $loginDuration = 0;
+
 	// TODO: Add a setting to say if magic login click should also verify a user.
 	// Grey out the option if verification is disabled on the website.
 
@@ -86,7 +94,7 @@ class Settings extends Model
 	public function rules(): array
 	{
 		return [
-			[['linkExpiry', 'passwordLength'], 'number'],
+			[['linkExpiry', 'passwordLength', 'loginDuration'], 'number'],
             [['autoRegisterOnLogin'], 'boolean'],
 			[['authenticationEmailSubject', 'allowedEmailPatternForRegistration'], 'string'],
 		];

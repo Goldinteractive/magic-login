@@ -338,7 +338,7 @@ class MagicLoginController extends Controller
         }
 
         // Attempt to login the user.
-        $loggedIn = Craft::$app->getUser()->loginByUserId($user->id);
+        $loggedIn = Craft::$app->getUser()->loginByUserId($user->id, MagicLogin::getInstance()->getSettings()->loginDuration);
 
         // If we can't login there was an error in Craft.
         if (!$loggedIn) {
